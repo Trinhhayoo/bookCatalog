@@ -7,15 +7,29 @@ const filters = (state, { type, payload }) => {
       return filtersInitialState;
 
     case FILTERS_ACTION.UPDATE_PUBLICATION_YEAR:
-      return { ...state, publicationYear: payload };
+      return {
+        ...state,
+        publicationYear: payload,
+        selectedAuthor: [],
+        ratingSort: "",
+      };
 
     case FILTERS_ACTION.UPDATE_AUTHOR:
-      return { ...state, UPDATE_AUTHOR: [...payload] };
+      return {
+        ...state,
+        selectedAuthor: [...payload],
+        publicationYear: false,
+        ratingSort: "",
+      };
 
+    case FILTERS_ACTION.CHANGE_RATING_SORT:
+      return {
+        ...state,
+        ratingSort: payload,
+        publicationYear: false,
+        selectedAuthor: []
+      };
 
-    case FILTERS_ACTION.UPDATE_RATING_SLIDER:
-      return { ...state, ratingSlider: payload };
-      
     default:
       return state;
   }

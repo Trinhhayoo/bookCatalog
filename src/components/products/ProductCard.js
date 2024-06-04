@@ -17,7 +17,7 @@ const ProductCard = ({ product, fromWishlist }) => {
   return (
     <div
     //   onClick={(e) => productOverview(id)}
-      className="flex flex-col items-center self-start border border-gray-900 rounded-lg hover:border hover:border-gray-700 py-4"
+      className="flex flex-col items-center self-start border border-gray-900 rounded-lg hover:border hover:border-gray-700 p-4"
     >
       <div class="relative w-56 h-80 bg-gray-300 overflow-hidden group">
         <img
@@ -25,10 +25,15 @@ const ProductCard = ({ product, fromWishlist }) => {
           src={imageUrl}
           alt={Name}
         />
-        <div class="absolute inset-x-0 top-full h-40 bg-gray-900  transition-all duration-500 ease-in-out group-hover:top-[80%]"></div>
-        <div class="relative z-10 flex items-center justify-center h-full">
-          <p>Rê chuột vào đây</p>
+        <div class="absolute inset-x-0 top-full h-40 bg-gray-900  transition-all duration-500 ease-in-out group-hover:top-[80%]">
+        {/* <div class="relative z-10 flex  mb-2 h-full">
+        {Authors.map((author) => (
+            <p className="text-white z-100">{author} </p>
+            
+          ))}
+        </div> */}
         </div>
+        
       </div>
 
       <div className="flex flex-col flex-wrap content-between justify-center mt-5 px-5  align-middle">
@@ -36,9 +41,8 @@ const ProductCard = ({ product, fromWishlist }) => {
           title={Authors}
           className=" h-6 text-base font-semibold tracking-tight text-gray-100  lg:text-sm overflow-hidden "
         >
-          {Authors.map((author) => (
-            author
-          ))}
+            {publicationYear}
+          
         </h5>
         <hr class="border-t-[0.5px] z-100 border-gray-400 w-full my-2" />
         <h5

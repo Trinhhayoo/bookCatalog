@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { BooksContext } from "../../../contexts/BooksProvider";
-import { FILTERS_ACTION } from "../../../constants/dispatchTypes.js"
+import { FILTERS_ACTION } from "../../../constants/dispatchTypes.js";
 
 const Checkbox = () => {
   const {
@@ -8,7 +8,9 @@ const Checkbox = () => {
     filtersState: { selectedAuthor },
     filtersDispatch,
   } = useContext(BooksContext);
-  console.log(author);
+  console.log([...author])
+
+
 
   const changeHandler = (e) => {
     let authors = selectedAuthor;
@@ -22,32 +24,39 @@ const Checkbox = () => {
       payload:authors,
     });
   };
+
   return (
     <fieldset className="pb-4">
       <legend className="text-sm text-gray-100">Author</legend>
+      <div className="h-[300px] overflow-y-scroll">
       <ul className="text-sm font-medium text-gray-100">
-        {author.length !== 0 && author.forEach((name) => (
-          <li key={name} className="w-full cursor-pointer">
-            <div className="flex items-center pl-3">
-              <input
-                id={name}
-                onChange={changeHandler}
-                name="categories"
-                value={name}
-                type="checkbox"
-                checked={selectedAuthor.includes(name)}
-                className="w-4 h-4 bg-gray-700 border-gray-500 cursor-pointer text-cyan-600 focus:ring-cyan-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2"
-              />
-              <label
-                htmlFor={name}
-                className="w-full py-2 ml-2 text-sm font-medium text-gray-100 cursor-pointer"
-              >
-                {name}
-              </label>
-            </div>
-          </li>
-        ))}
+        {author.size > 0 ? (
+          [...author].map(( name ) => (
+            <li key={name} className="w-full cursor-pointer">
+              <div className="flex items-center pl-3">
+                <input
+                  id={name}
+                  onChange={changeHandler}
+                  name="categories"
+                  value={name}
+                  type="checkbox"
+                  checked={selectedAuthor.includes(name)}
+                  className="w-4 h-4 bg-gray-700 border-gray-500 cursor-pointer text-cyan-600 focus:ring-cyan-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2"
+                />
+                <label
+                  htmlFor={name}
+                  className="w-full py-2 ml-2 text-sm font-medium text-gray-100 cursor-pointer"
+                >
+                  {name}
+                </label>
+              </div>
+            </li>
+          ))
+        ) : (
+          <p>No authors found.</p>
+        )}
       </ul>
+      </div>
     </fieldset>
   );
 };

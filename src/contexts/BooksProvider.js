@@ -46,26 +46,34 @@ const BooksProvider = ({ children }) => {
   const [bookData, setBooks] = useState([]);
   const [imageMap, setImageMap] = useState(new Map());
 
-  const { selectedAuthor, publicationYear, ratingSlider } = filtersState;
+  const { selectedAuthor, publicationYear, ratingSort } = filtersState;
   const { booksData, author } = booksState;
 
   const searchProductsHandler = () =>
     searchTerm === ""
-      ? booksData
+      ? booksData.sort((a, b) => b.publicationYear - a.publicationYear)
       : booksData.filter((books) =>
           books.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
   const changeAuthorHandler = (payload) => {
+    console.log(payload);
     return selectedAuthor.length === 0
       ? payload
-      : payload.filter(({ author }) => selectedAuthor.includes(author));
+      : payload.filter(({ Authors }) => {
+          // Kiểm tra xem selectedAuthor có tồn tại trong mảng Authors hay không
+          return Authors.some((author) => selectedAuthor.includes(author));
+        });
   };
 
-  const changeRatingsSliderHandler = (payload) => {
-    return ratingSlider === 0
-      ? payload
-      : payload.filter(({ rating }) => rating >= ratingSlider);
+  const changeRatingSort = (payload) => {
+    console.log("check rating sort" + payload);
+    if (ratingSort === "") return payload;
+    return payload
+      .slice()
+      .sort((a, b) =>
+        ratingSort === "ASC" ? a.Rating - b.Rating : b.Rating - a.Rating
+      );
   };
 
   const changePublicationYear = (payload) => {
@@ -78,8 +86,12 @@ const BooksProvider = ({ children }) => {
 
   const allSortsAndFilters = () => {
     let filteredData = searchProductsHandler();
-    filteredData = changeAuthorHandler(filteredData);
-    filteredData = changeRatingsSliderHandler(filteredData);
+    if (selectedAuthor.length !== 0) {
+      filteredData = changeAuthorHandler(filteredData);
+    } else if (ratingSort != "") {
+      filteredData = changeRatingSort(filteredData);
+    }
+
     return filteredData;
   };
 
@@ -114,20 +126,19 @@ const BooksProvider = ({ children }) => {
 
   const getAuthor = async (dispatch) => {
     const uniqueAuthors = new Set();
-if (bookData.length !== 0){
-    booksData.forEach(book => {
+    if (bookData.length !== 0) {
+      booksData.forEach((book) => {
         if (Array.isArray(book.Authors)) {
-       book.Authors.forEach(author => uniqueAuthors.add(author));
-     }
-     console.log(uniqueAuthors)
-     dispatch({
-       type: BOOKS_ACTIONS.SAVE_AUTHOR_DATA,
-       payload:uniqueAuthors,
-     });
-   });
-}
- 
-  }
+          book.Authors.forEach((author) => uniqueAuthors.add(author));
+        }
+        console.log(uniqueAuthors);
+        dispatch({
+          type: BOOKS_ACTIONS.SAVE_AUTHOR_DATA,
+          payload: uniqueAuthors,
+        });
+      });
+    }
+  };
 
   const getAllData = async (dispatch) => {
     setBooks(await getAllBooks());

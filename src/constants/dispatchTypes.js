@@ -11,5 +11,5 @@ export const FILTERS_ACTION = {
   RESET: "reset",
   UPDATE_PUBLICATION_YEAR: "update_publication_year",
   UPDATE_AUTHOR: "update_author",
-  UPDATE_RATING_SLIDER: "update_rating_slider",
+  CHANGE_RATING_SORT: "change_rating_sort",
 };

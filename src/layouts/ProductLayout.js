@@ -9,6 +9,8 @@ import Range from "../components/products/filters/Range";
 import { Outlet, useParams } from "react-router-dom";
 import { BooksContext } from "../contexts/BooksProvider";
 import { FILTERS_ACTION } from "../constants/dispatchTypes";
+import { FaPlus } from "react-icons/fa6";
+
 const ProductLayout = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const {
@@ -16,16 +18,6 @@ const ProductLayout = () => {
     filtersDispatch,
     handleFilterReset,
   } = useContext(BooksContext);
-
-  const { authors } = useParams();
-
-  useEffect(() => {
-    authors &&
-      filtersDispatch({
-        type: FILTERS_ACTION.UPDATE_AUTHOR,
-        payload: [authors],
-      });
-  }, [authors, filtersDispatch]);
 
   const ratingsRange = {
     value: ratingSlider,
@@ -35,12 +27,12 @@ const ProductLayout = () => {
         ? `Ratings (${ratingSlider})`
         : `Ratings (${ratingSlider} and above)`,
     max: 10,
-    min:0,
+    min: 0,
     step: 1,
     dispatchType: FILTERS_ACTION.UPDATE_RATING_SLIDER,
   };
   return (
-    <div className=" bg-gray-900 mx-auto md:max-w-2xl lg:max-w-7xl">
+    <div className=" bg-gray-900  ">
       {/* Mobile filter dialog */}
       <Transition.Root show={mobileFiltersOpen} as={Fragment}>
         <Dialog
@@ -82,7 +74,7 @@ const ProductLayout = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between px-4 mt-8">
+                <div className="flex items-center justify-between px-4 mt-8 ">
                   <h2 className="text-lg font-medium text-gray-100">Filters</h2>
                   <span className="w-px h-6 bg-gray-700" aria-hidden="true" />
                   <button
@@ -96,7 +88,7 @@ const ProductLayout = () => {
                 </div>
 
                 {/* Filters */}
-                <form className="mt-4 border-t border-gray-200">
+                <form className="mt-4 border-t border-gray-200 ">
                   <h3 className="sr-only">Categories</h3>
                   <div className="px-4 mt-12 space-y-2">
                     <Radio />
@@ -111,14 +103,9 @@ const ProductLayout = () => {
       </Transition.Root>
 
       <main className="relative px-4 mx-auto md:ml-36 mt-18 bg-gray-900 max-w-7xl sm:px-6 lg:px-8">
-        <div className="sticky z-20 flex items-baseline justify-between pt-40 pb-8 bg-gray-900 sm:top-16 lg:top-0 md:pt-24 mb-30">
-          <h1 className="font-bold tracking-tight text-gray-100 md:text-xl lg:text-4xl">
-            Books
-          </h1>
-
+        <div className="sticky z-20 flex items-baseline justify-between pt-40 bg-gray-900 sm:top-16 lg:top-0 md:pt-24 mb-30">
           <div className="flex items-center">
-            <Menu as="div" className="relative inline-block text-left">
-            </Menu>
+            <Menu as="div" className="relative inline-block text-left"></Menu>
             <button
               type="button"
               className="p-2 ml-4 -m-2 text-gray-400 hover:text-gray-500 sm:ml-6 md:hidden"
@@ -147,7 +134,10 @@ const ProductLayout = () => {
                   <span className="font-bold tracking-wide md:text-md lg:text-2xl">
                     Filters
                   </span>
-                  <span className="hidden w-px h-6 bg-gray-700 lg:block" aria-hidden="true" />
+                  <span
+                    className="hidden w-px h-6 bg-gray-700 lg:block"
+                    aria-hidden="true"
+                  />
                   <button
                     onClick={handleFilterReset}
                     className="flex items-center p-2 text-sm text-gray-400 rounded-lg hover:bg-gray-50 hover:bg-opacity-10"
@@ -168,7 +158,17 @@ const ProductLayout = () => {
           </aside>
 
           {/* Product grid */}
-          <div className="p-4 sm:mt-12 lg:mt-0">
+          <div className="ml-32 p-4 sm:mt-12 lg:mt-0">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="  justify-end text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700 me-2 mb-2 "
+              >
+                <FaPlus className="w-6 h-5 me-2 -ms-1" />
+                Add new book
+              </button>
+            </div>
+
             <Outlet />
           </div>
         </section>
