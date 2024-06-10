@@ -36,3 +36,15 @@
     transform: rotate(360deg);
   }
 }
+.animate-slideInfinite {
+  animation: slideInfinite 2s linear infinite;
+}
+
+@keyframes slideInfinite {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

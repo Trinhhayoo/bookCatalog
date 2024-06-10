@@ -9,6 +9,11 @@ const books = (state, { type, payload }) => {
     case BOOKS_ACTIONS.SAVE_AUTHOR_DATA:
       return { ...state, author: payload };
 
+
+
+    case BOOKS_ACTIONS.SAVE_EDIT_BOOK:
+      return { ...state,  editingBook: payload };
+
     case BOOKS_ACTIONS.RESET:
       return booksInitialState;
 
@@ -18,6 +23,11 @@ const books = (state, { type, payload }) => {
         booksData: state.booksData.map((book) =>
           book.id === payload.id ? { ...book, ...payload.updatedData } : book
         ),
+      };
+    case BOOKS_ACTIONS.REMOVE_BOOK:
+      return {
+        ...state,
+        booksData: state.booksData.filter((book) => book.id !== payload.id),
       };
 
     case BOOKS_ACTIONS.ADD_BOOK:

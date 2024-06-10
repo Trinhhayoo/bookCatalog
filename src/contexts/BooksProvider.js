@@ -11,7 +11,6 @@ import { booksInitialState } from "./initialStates/BooksInitialState";
 import filters from "./reducers/Filters";
 import books from "./reducers/Books";
 import { BOOKS_ACTIONS, FILTERS_ACTION } from "../constants/dispatchTypes";
-
 import { toast } from "react-hot-toast";
 
 import { fireStore, storage } from "../database/firebase";
@@ -25,6 +24,8 @@ import {
   getDoc,
   setDoc,
   query,
+  deleteDoc,
+  updateDoc
 } from "firebase/firestore";
 import {
   uploadBytesResumable,
@@ -47,7 +48,7 @@ const BooksProvider = ({ children }) => {
   const [imageMap, setImageMap] = useState(new Map());
 
   const { selectedAuthor, publicationYear, ratingSort } = filtersState;
-  const { booksData, author } = booksState;
+  const { booksData, author,  editingBook } = booksState;
 
   const searchProductsHandler = () =>
     searchTerm === ""
@@ -75,6 +76,7 @@ const BooksProvider = ({ children }) => {
         ratingSort === "ASC" ? a.Rating - b.Rating : b.Rating - a.Rating
       );
   };
+  
 
   const changePublicationYear = (payload) => {
     if (publicationYear == true) return payload;
@@ -123,6 +125,45 @@ const BooksProvider = ({ children }) => {
       });
     }
   };
+  const addNewBook = async (newBook) => {
+    try {
+      const booksRef = collection(fireStore, "Books");
+      await setDoc(doc(booksRef), newBook);
+      booksDispatch({ type: BOOKS_ACTIONS.ADD_BOOK, payload: newBook });
+      toast.success("New book added successfully!");
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const saveEditBook = (book) => {
+    booksDispatch({ type: BOOKS_ACTIONS.SAVE_EDIT_BOOK, payload: book});
+
+  }
+  const updateBookData = async (updatedBook, id) => {
+    try {
+      console.log(updatedBook)
+      const booksRef = doc(fireStore, "Books", id);
+      await updateDoc(booksRef, updatedBook);
+      booksDispatch({ type: BOOKS_ACTIONS.EDIT_BOOK, payload: updatedBook });
+      toast.success("Book updated successfully!");
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+ 
+  
+  const deleteBook = async (bookId) => {
+    try {
+      const booksRef = doc(fireStore, "Books", bookId);
+      await deleteDoc(booksRef);
+      booksDispatch({ type: BOOKS_ACTIONS.DELETE_BOOK, payload: bookId });
+      toast.success("Book deleted successfully!");
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
   const getAuthor = async (dispatch) => {
     const uniqueAuthors = new Set();
@@ -139,6 +180,25 @@ const BooksProvider = ({ children }) => {
       });
     }
   };
+  const recommendBook = () => {
+    
+    // Lọc ra các cuốn sách được xuất bản từ 3 năm trước trở về trước
+    const oldBooks = booksData.filter(book => books.publicationYear <= new Date().getFullYear() - 3);
+    console.log(oldBooks);
+    // Lọc ra các cuốn sách có rating cao nhất
+    const bestRatedBooks = oldBooks.filter(book => book.Rating === Math.max(...oldBooks.map(b => b.Rating)));
+  console.log(bestRatedBooks)
+    // Nếu có nhiều cuốn sách tốt khớp với tiêu chí, chọn một cuốn ngẫu nhiên
+    if (bestRatedBooks.length > 1) {
+      return bestRatedBooks[Math.floor(Math.random() * bestRatedBooks.length)];
+    
+    } else if (bestRatedBooks.length === 1) {
+    
+      return bestRatedBooks[0];
+    } else {
+      return null; // Không có cuốn sách nào khớp với tiêu chí
+    }
+  }
 
   const getAllData = async (dispatch) => {
     setBooks(await getAllBooks());
@@ -152,15 +212,21 @@ const BooksProvider = ({ children }) => {
 
   useEffect(() => {
     getAllData(booksDispatch);
-  }, []);
+  }, [bookData]);
   useEffect(() => {
     updateBook(booksDispatch);
     getAuthor(booksDispatch);
+    
   }, [bookData, imageMap]);
+  
 
   return (
     <BooksContext.Provider
       value={{
+        addNewBook,
+        deleteBook,
+        updateBook,
+        updateBookData,
         getAllData,
         filtersState,
         filtersDispatch,
@@ -174,6 +240,8 @@ const BooksProvider = ({ children }) => {
         searchTerm,
         setSearchTerm,
         getAllBooks,
+        saveEditBook,
+        recommendBook
       }}
     >
       {children}

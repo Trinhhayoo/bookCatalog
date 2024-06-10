@@ -10,14 +10,20 @@ import { Outlet, useParams } from "react-router-dom";
 import { BooksContext } from "../contexts/BooksProvider";
 import { FILTERS_ACTION } from "../constants/dispatchTypes";
 import { FaPlus } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+import RecommendBook from "../components/recommendBook/RecommendBook";
 
 const ProductLayout = () => {
+  const navigate = useNavigate();
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const {
     filtersState: { ratingSlider },
     filtersDispatch,
     handleFilterReset,
+    recommendBook
   } = useContext(BooksContext);
+  const cdmBook = recommendBook();
 
   const ratingsRange = {
     value: ratingSlider,
@@ -159,8 +165,11 @@ const ProductLayout = () => {
 
           {/* Product grid */}
           <div className="ml-32 p-4 sm:mt-12 lg:mt-0">
+            {cdmBook && <RecommendBook product = {cdmBook} /> }
+            
             <div className="flex justify-end">
               <button
+                onClick={() => navigate("addBook")}
                 type="button"
                 className="  justify-end text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700 me-2 mb-2 "
               >

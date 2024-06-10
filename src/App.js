@@ -9,21 +9,22 @@ import AddBook from "./pages/addBook/AddBook";
 import Home from "./pages/home/Home";
 
 import PageNotFound from "./pages/pageNotFound/PageNotFound";
+import EditBook from "./pages/editBook/EditBook";
 
 function App() {
   return (
     <>
         <Routes>
         <Route path="/" element={<RootLayout />}>    
-        <Route index element={<Home />} />
         <Route path="/addBook" element={<AddBook />} />
-
+        <Route path="/editBook" element={<EditBook />} />
      
-          <Route path="products" element={<ProductLayout />}>
+          <Route path="" element={<ProductLayout />}>
             <Route index element={<Home />} />
             <Route path=":category" element={<Home />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
+
         </Route>
       </Routes>
     </>

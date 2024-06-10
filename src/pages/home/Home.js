@@ -17,7 +17,15 @@ const Home = () => {
     return () => clearTimeout(loader);
   }, []);
 
+  
+
+ 
+
+  
+
   const { booksData } = booksState;
+
+  console.log(booksData)
   const { selectedAuthor, publicationYear, ratingSort } = filtersState;
 
   const [isBooksByYearExpanded, setIsBooksByYearExpanded] = useState({});

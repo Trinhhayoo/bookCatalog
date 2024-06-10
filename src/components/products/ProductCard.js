@@ -1,14 +1,47 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { BooksContext } from "../../contexts/BooksProvider";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdModeEdit } from "react-icons/md";
 
-
+import { fireStore, storage } from "../../database/firebase";
+import { deleteObject, ref } from "firebase/storage";
+import { deleteDoc, doc } from "firebase/firestore";
 const ProductCard = ({ product, fromWishlist }) => {
     console.log(product)
   
   const navigate = useNavigate();
 
   const { Authors, ISBN, imageUrl,Rating, Name, id, publicationYear } = product;
+  const desertRef = ref(storage, `booksImage/${product.id}`);
+  const { addNewBook, updateBookData, deleteBook, saveEditBook } =
+  useContext(BooksContext);
+
+
+
+  const deleteBookFunc = async () => {
+    try {
+     
+        deleteBook(product.id);
+      
+
+    
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const updateBookFunc = async () => {
+    try {
+     
+        saveEditBook(product);
+      navigate("/editBook");
+
+    
+    } catch (e) {
+      console.log(e)
+    }
+  }
 
   
 
@@ -25,13 +58,16 @@ const ProductCard = ({ product, fromWishlist }) => {
           src={imageUrl}
           alt={Name}
         />
-        <div class="absolute inset-x-0 top-full h-40 bg-gray-900  transition-all duration-500 ease-in-out group-hover:top-[80%]">
+        <div class="absolute inset-x-0 top-full h-40 bg-gray-900  flex   transition-all duration-500 ease-in-out group-hover:top-[80%]">
         {/* <div class="relative z-10 flex  mb-2 h-full">
         {Authors.map((author) => (
             <p className="text-white z-100">{author} </p>
             
           ))}
         </div> */}
+        <span><RiDeleteBin6Line onClick = {deleteBookFunc} className="text-white mx-2 mt-5 size-5 " /></span>
+        <span><MdModeEdit onClick = {updateBookFunc} className="text-white mx-2 mt-5 size-5" /></span>
+
         </div>
         
       </div>

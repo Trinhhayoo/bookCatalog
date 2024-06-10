@@ -1,32 +1,37 @@
 import { useNavigate } from "react-router-dom";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 
 import React from "react";
+import { BooksContext } from "../../contexts/BooksProvider";
 
 import { fireStore, storage } from "../../database/firebase";
 import { setDoc, doc } from "firebase/firestore";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 
-const UploadSong = () => {
+const EditBook = () => {
+    const { filtersState, booksState, allSortsAndFilters, updateBookData } =
+    useContext(BooksContext);
+    const { editingBook } = booksState;
+
   const navigate = useNavigate();
 
-  const [bookName, setbookName] = useState("");
+  const [bookName, setbookName] = useState(editingBook.Name);
   const [bookNameError, setbookNameError] = useState("");
 
-  const [authors, setAuthors] = useState([]);
+  const [authors, setAuthors] = useState(editingBook.Authors);
   const [authorError, setAuthorError] = useState("");
 
-  const [rating, setRating] = useState("");
+  const [rating, setRating] = useState(editingBook.Rating);
   const [ratingError, setRatingError] = useState("");
 
-  const [publicationYear, setPublication] = useState("");
+  const [publicationYear, setPublication] = useState(editingBook.publicationYear);
   const [publicationYearError, setPublicationYearError] = useState("");
 
-  const [ISBN, setISBN] = useState("");
+  const [ISBN, setISBN] = useState(editingBook.ISBN);
   const [ISBNError, setISBNError] = useState();
 
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(editingBook.imageUrl);
   const [uploadedImagePost, setUploadedImagePost] = useState(null);
 
   const [isUploaded, setIsUploaded] = useState(false);
@@ -125,22 +130,22 @@ const UploadSong = () => {
 
     setUuid(crypto.randomUUID());
 
+   
+
     if (isFormValid) {
       try {
-        const response = await setDoc(doc(fireStore, "Books", uuid), {
-          Name: bookName,
-          Authors: authors,
-          Rating: rating,
-          publicationYear: publicationYear,
-          ISBN: ISBN,
-        });
-        const storageRef = ref(storage, `booksImage/${uuid}`);
-        const uploadTask = await uploadBytesResumable(
-          storageRef,
-          uploadedImagePost
-        );
-        console.log(response);
-        console.log(uploadTask);
+        const book = {
+            Name: bookName,
+            Authors: authors,
+            Rating: rating,
+            publicationYear: publicationYear,
+            ISBN: ISBN
+        }
+        
+        updateBookData(book, editingBook.id);
+
+
+        
         setShowPopup(true);
       } catch (error) {
         console.log(error);
@@ -367,4 +372,4 @@ const UploadSong = () => {
     </div>
   );
 };
-export default UploadSong;
+export default EditBook;
