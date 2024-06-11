@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -25,7 +26,7 @@ import {
   setDoc,
   query,
   deleteDoc,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import {
   uploadBytesResumable,
@@ -48,7 +49,7 @@ const BooksProvider = ({ children }) => {
   const [imageMap, setImageMap] = useState(new Map());
 
   const { selectedAuthor, publicationYear, ratingSort } = filtersState;
-  const { booksData, author,  editingBook } = booksState;
+  const { booksData, author, editingBook } = booksState;
 
   const searchProductsHandler = () =>
     searchTerm === ""
@@ -58,17 +59,14 @@ const BooksProvider = ({ children }) => {
         );
 
   const changeAuthorHandler = (payload) => {
-    console.log(payload);
     return selectedAuthor.length === 0
       ? payload
       : payload.filter(({ Authors }) => {
-          // Kiểm tra xem selectedAuthor có tồn tại trong mảng Authors hay không
           return Authors.some((author) => selectedAuthor.includes(author));
         });
   };
 
   const changeRatingSort = (payload) => {
-    console.log("check rating sort" + payload);
     if (ratingSort === "") return payload;
     return payload
       .slice()
@@ -76,10 +74,9 @@ const BooksProvider = ({ children }) => {
         ratingSort === "ASC" ? a.Rating - b.Rating : b.Rating - a.Rating
       );
   };
-  
 
   const changePublicationYear = (payload) => {
-    if (publicationYear == true) return payload;
+    if (publicationYear === true) return payload;
   };
 
   const handleFilterReset = () => {
@@ -90,7 +87,7 @@ const BooksProvider = ({ children }) => {
     let filteredData = searchProductsHandler();
     if (selectedAuthor.length !== 0) {
       filteredData = changeAuthorHandler(filteredData);
-    } else if (ratingSort != "") {
+    } else if (ratingSort !== "") {
       filteredData = changeRatingSort(filteredData);
     }
 
@@ -101,10 +98,11 @@ const BooksProvider = ({ children }) => {
     console.error(e);
     toast.error("Something Went Wrong, Try Later");
   };
+
   const updateBook = async (dispatch) => {
-    if (bookData.length !== 0 && imageMap.length !== 0) {
+    if (bookData.length !== 0 && imageMap.size !== 0) {
       const updatedBookData = bookData.map((book) => {
-        const bookIdStr = book.id.toString(); // Ensure book.id is a string
+        const bookIdStr = book.id.toString();
         const imageUrl = imageMap.get(bookIdStr);
 
         if (!imageUrl) {
@@ -116,8 +114,7 @@ const BooksProvider = ({ children }) => {
           imageUrl: imageUrl || "", // Default to empty string if no URL is found
         };
       });
-
-      console.log(updatedBookData);
+      // setBooks(updatedBookData);
 
       booksDispatch({
         type: BOOKS_ACTIONS.SAVE_BOOKS_DATA,
@@ -125,6 +122,7 @@ const BooksProvider = ({ children }) => {
       });
     }
   };
+
   const addNewBook = async (newBook) => {
     try {
       const booksRef = collection(fireStore, "Books");
@@ -137,12 +135,11 @@ const BooksProvider = ({ children }) => {
   };
 
   const saveEditBook = (book) => {
-    booksDispatch({ type: BOOKS_ACTIONS.SAVE_EDIT_BOOK, payload: book});
+    booksDispatch({ type: BOOKS_ACTIONS.SAVE_EDIT_BOOK, payload: book });
+  };
 
-  }
   const updateBookData = async (updatedBook, id) => {
     try {
-      console.log(updatedBook)
       const booksRef = doc(fireStore, "Books", id);
       await updateDoc(booksRef, updatedBook);
       booksDispatch({ type: BOOKS_ACTIONS.EDIT_BOOK, payload: updatedBook });
@@ -152,14 +149,13 @@ const BooksProvider = ({ children }) => {
     }
   };
 
- 
-  
   const deleteBook = async (bookId) => {
     try {
       const booksRef = doc(fireStore, "Books", bookId);
       await deleteDoc(booksRef);
       booksDispatch({ type: BOOKS_ACTIONS.DELETE_BOOK, payload: bookId });
       toast.success("Book deleted successfully!");
+      getAllData();
     } catch (error) {
       handleError(error);
     }
@@ -167,12 +163,11 @@ const BooksProvider = ({ children }) => {
 
   const getAuthor = async (dispatch) => {
     const uniqueAuthors = new Set();
-    if (bookData.length !== 0) {
+    if (bookData && bookData.length !== 0) {
       booksData.forEach((book) => {
         if (Array.isArray(book.Authors)) {
           book.Authors.forEach((author) => uniqueAuthors.add(author));
         }
-        console.log(uniqueAuthors);
         dispatch({
           type: BOOKS_ACTIONS.SAVE_AUTHOR_DATA,
           payload: uniqueAuthors,
@@ -180,45 +175,52 @@ const BooksProvider = ({ children }) => {
       });
     }
   };
+
   const recommendBook = () => {
-    
-    // Lọc ra các cuốn sách được xuất bản từ 3 năm trước trở về trước
-    const oldBooks = booksData.filter(book => books.publicationYear <= new Date().getFullYear() - 3);
-    console.log(oldBooks);
-    // Lọc ra các cuốn sách có rating cao nhất
-    const bestRatedBooks = oldBooks.filter(book => book.Rating === Math.max(...oldBooks.map(b => b.Rating)));
-  console.log(bestRatedBooks)
-    // Nếu có nhiều cuốn sách tốt khớp với tiêu chí, chọn một cuốn ngẫu nhiên
+    console.log(new Date().getFullYear() - 3)
+
+    const oldBooks = booksData.filter(
+      (book) => book.publicationYear <= new Date().getFullYear() - 3
+    );
+    console.log(oldBooks)
+    const bestRatedBooks = oldBooks.filter(
+      (book) => book.Rating == Math.max(...oldBooks.map((b) => b.Rating))
+    );
     if (bestRatedBooks.length > 1) {
-      return bestRatedBooks[Math.floor(Math.random() * bestRatedBooks.length)];
-    
+      return bestRatedBooks[
+        Math.floor(Math.random() * bestRatedBooks.length)
+      ];
     } else if (bestRatedBooks.length === 1) {
-    
       return bestRatedBooks[0];
     } else {
-      return null; // Không có cuốn sách nào khớp với tiêu chí
+      return null;
     }
-  }
+  };
 
   const getAllData = async (dispatch) => {
-    setBooks(await getAllBooks());
-    const images = await getImageOfBooks();
-
-    const imageMap = new Map(
-      images.map((img) => [img.name.split(".")[0], img.url])
-    );
-    setImageMap(imageMap);
+    const books = await getAllBooks();
+    if (books) {
+      setBooks(books);
+      const images = await getImageOfBooks();
+      if (images) {
+        const imageMap = new Map(
+          images.map((img) => [img.name.split(".")[0], img.url])
+        );
+        setImageMap(imageMap);
+      }
+    }
   };
 
   useEffect(() => {
     getAllData(booksDispatch);
-  }, [bookData]);
+  }, []);
+
   useEffect(() => {
-    updateBook(booksDispatch);
-    getAuthor(booksDispatch);
-    
+    if (bookData && bookData.length !== 0 && imageMap.size !== 0) {
+      updateBook(booksDispatch);
+      getAuthor(booksDispatch);
+    }
   }, [bookData, imageMap]);
-  
 
   return (
     <BooksContext.Provider
@@ -241,7 +243,7 @@ const BooksProvider = ({ children }) => {
         setSearchTerm,
         getAllBooks,
         saveEditBook,
-        recommendBook
+        recommendBook,
       }}
     >
       {children}
@@ -254,19 +256,16 @@ export default BooksProvider;
 const getAllBooks = async () => {
   try {
     const booksRef = collection(fireStore, "Books");
-
     const booksQuery = query(
       booksRef,
       orderBy("publicationYear", "desc"),
       orderBy("Name", "asc")
     );
     const snapshot = await getDocs(booksQuery);
-
     const booksData = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data(), // Spread document data into the object
+      ...doc.data(),
     }));
-
     return booksData;
   } catch (error) {
     console.error("Error fetching books:", error);
@@ -275,10 +274,8 @@ const getAllBooks = async () => {
 
 const getImageOfBooks = async () => {
   const imageRef = sRef(storage, "booksImage");
-
   try {
     const result = await listAll(imageRef);
-
     const imagePromises = result.items.map(async (itemRef) => {
       const url = await getDownloadURL(itemRef);
       return {
@@ -286,9 +283,7 @@ const getImageOfBooks = async () => {
         url,
       };
     });
-
     const images = await Promise.all(imagePromises);
-
     return images;
   } catch (error) {
     console.error("Error fetching images:", error);

@@ -3,24 +3,25 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get } from "firebase/database";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
-// import { getAnalytics } from "firebase/analytics"; // Uncomment if you need analytics
+
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBFBsc2oECU1K_oXYCBJOkQUVPMJSUiHI8",
-  authDomain: "bookcatalog-39604.firebaseapp.com",
-  projectId: "bookcatalog-39604",
-  storageBucket: "bookcatalog-39604.appspot.com",
-  messagingSenderId: "419005757124",
-  appId: "1:419005757124:web:53e1e8e055bbe2a8a9bb91",
-  measurementId: "G-6Q6LT8JNLQ"
+  apiKey: "AIzaSyDfOG3mv4wEGIJCD3l63bs7n_RltO3uwIo",
+  authDomain: "bookcatalog-40a90.firebaseapp.com",
+  projectId: "bookcatalog-40a90",
+  storageBucket: "bookcatalog-40a90.appspot.com",
+  messagingSenderId: "833677726029",
+  appId: "1:833677726029:web:e40964d56e747904d7e704",
+  measurementId: "G-56FR7R8LQM"
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize services
 
 const database = getDatabase(app);
 const fireStore = getFirestore(app);

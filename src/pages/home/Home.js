@@ -177,7 +177,7 @@ const Home = () => {
           </div>
         )}
       </Transition>
-      {booksData === 0 && allSortsAndFilters().length === 0 && (
+      {booksData.length === 0 && allSortsAndFilters().length === 0 && (
         <div className="flex justify-center my-20 sm:my-32">
           <p className="text-2xl text-center text-gray-100 sm:text-4xl">
             Oops! Looks like our Book Shelf is empty. 😟

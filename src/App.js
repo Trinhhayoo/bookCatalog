@@ -4,8 +4,7 @@ import "./App.css";
 import RootLayout from "./layouts/RootLayout";
 import ProductLayout from "./layouts/ProductLayout";
 
-import AddBook from "./pages/addBook/AddBook";
-
+import AddBook from "../src/pages/addBook/AddBook.js";
 import Home from "./pages/home/Home";
 
 import PageNotFound from "./pages/pageNotFound/PageNotFound";

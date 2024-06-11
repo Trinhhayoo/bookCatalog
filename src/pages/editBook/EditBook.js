@@ -63,30 +63,20 @@ const EditBook = () => {
     navigate(newPath);
     window.location.replace(newPath);
   };
+  // Utility function to validate ISBN-10
+function isValidIsbn10(isbn) {
+    const regex = /^(?:\d{9}\d|[A-Z]{1}|\d[A-Z]{1})$/;
+    return regex.test(isbn);
+  }
+  
+  // Utility function to validate ISBN-13
+  function isValidIsbn13(isbn) {
+    const regex = /^(?:\d{12}\d|[A-Z]{1}|\d[A-Z]{1}|\d{1,5}-\d{1,7}-\d{1,6}-\d)$/;
+    return regex.test(isbn);
+  }
   const  checkISBN = (isbn) => {
-    // Remove any non-digit characters from the input
-    isbn = isbn.replace(/\D/g, '');
   
-    // Check the length of the ISBN
-    if (isbn.length !== 10 && isbn.length !== 13) {
-      return false;
-    }
-  
-    // Calculate the checksum for the ISBN
-    let sum = 0;
-    let weight = isbn.length === 10 ? 10 : 1;
-  
-    for (let i = 0; i < isbn.length - 1; i++) {
-      sum += parseInt(isbn[i]) * weight;
-      weight--;
-    }
-  
-    let checkDigit = isbn.length === 10 ? parseInt(isbn[9]) : parseInt(isbn[12]);
-    let remainder = sum % 11;
-    let calculatedCheckDigit = isbn.length === 10 ? (remainder === 0 ? 0 : 11 - remainder) : (10 - remainder) % 10;
-  
-    // Compare the calculated check digit with the provided check digit
-    return checkDigit === calculatedCheckDigit;
+   return isValidIsbn10(isbn) || isValidIsbn13(isbn);
   }
 
  
@@ -115,24 +105,30 @@ const EditBook = () => {
       setPublication(0);
 
     if (ISBN !== ""){
-      if(!checkISBN(ISBN)) {
+      if(checkISBN(ISBN) === false) {
+        
         setISBNError("ISBN is not invalid");
-        setIsFormValid(false);
+        setIsFormValid(isFormValid =>!isFormValid);
+
+        console.log(isFormValid)
+
 
       }
       else {
-        setbookNameError("");
+        setISBNError("");
       }
     } else {
-      setbookNameError("");
+      setISBNError("");
     }
       
 
     setUuid(crypto.randomUUID());
 
    
+    console.log(isFormValid)
 
-    if (isFormValid) {
+    if ((checkISBN(ISBN) || ISBN === "") && authors.length !== 0 && bookName !== ""  ) {
+        
       try {
         const book = {
             Name: bookName,
@@ -180,7 +176,7 @@ const EditBook = () => {
           className="absolute inset-0 object-cover object-right w-full h-full -z-10 md:object-center"
         />
         <div className=" text-white flex my-10  justify-center font-bold text-3xl ">
-          CREATE NEW BOOK
+          EDIT BOOK
         </div>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-row h-1/2 my-8 mx-8 justify-center">

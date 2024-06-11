@@ -10,7 +10,6 @@ const books = (state, { type, payload }) => {
       return { ...state, author: payload };
 
 
-
     case BOOKS_ACTIONS.SAVE_EDIT_BOOK:
       return { ...state,  editingBook: payload };
 
@@ -24,7 +23,7 @@ const books = (state, { type, payload }) => {
           book.id === payload.id ? { ...book, ...payload.updatedData } : book
         ),
       };
-    case BOOKS_ACTIONS.REMOVE_BOOK:
+    case BOOKS_ACTIONS.DELETE_BOOK:
       return {
         ...state,
         booksData: state.booksData.filter((book) => book.id !== payload.id),

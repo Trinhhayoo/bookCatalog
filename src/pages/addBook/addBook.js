@@ -50,41 +50,28 @@ const UploadSong = () => {
     setUploadedImage(null);
   };
 
-
   const handleHome = () => {
     setShowPopup(false);
 
-    const newPath = '/';
+    const newPath = "/";
     navigate(newPath);
     window.location.replace(newPath);
   };
-  const  checkISBN = (isbn) => {
-    // Remove any non-digit characters from the input
-    isbn = isbn.replace(/\D/g, '');
-  
-    // Check the length of the ISBN
-    if (isbn.length !== 10 && isbn.length !== 13) {
-      return false;
-    }
-  
-    // Calculate the checksum for the ISBN
-    let sum = 0;
-    let weight = isbn.length === 10 ? 10 : 1;
-  
-    for (let i = 0; i < isbn.length - 1; i++) {
-      sum += parseInt(isbn[i]) * weight;
-      weight--;
-    }
-  
-    let checkDigit = isbn.length === 10 ? parseInt(isbn[9]) : parseInt(isbn[12]);
-    let remainder = sum % 11;
-    let calculatedCheckDigit = isbn.length === 10 ? (remainder === 0 ? 0 : 11 - remainder) : (10 - remainder) % 10;
-  
-    // Compare the calculated check digit with the provided check digit
-    return checkDigit === calculatedCheckDigit;
+  // Utility function to validate ISBN-10
+  function isValidIsbn10(isbn) {
+    const regex = /^(?:\d{9}\d|[A-Z]{1}|\d[A-Z]{1})$/;
+    return regex.test(isbn);
   }
 
- 
+  // Utility function to validate ISBN-13
+  function isValidIsbn13(isbn) {
+    const regex =
+      /^(?:\d{12}\d|[A-Z]{1}|\d[A-Z]{1}|\d{1,5}-\d{1,7}-\d{1,6}-\d)$/;
+    return regex.test(isbn);
+  }
+  const checkISBN = (isbn) => {
+    return isValidIsbn10(isbn) || isValidIsbn13(isbn);
+  };
 
   const handleSubmit = async (event) => {
     //  event.preventDefault();
@@ -92,38 +79,39 @@ const UploadSong = () => {
 
     if (authors.length === 0) {
       setAuthorError("Author must have at least one");
-      setIsFormValid(false);
     } else {
       setAuthorError("");
     }
 
     if (bookName === "") {
-      setbookNameError("Song name is required");
-      setIsFormValid(false);
+      setbookNameError("Book's name is required");
     } else {
       setbookNameError("");
     }
-    if (rating === ""){
-      setRating(0)
-    };
-    if (publicationYear === "")
-      setPublication(0);
+    if (rating === "") {
+      setRating(0);
+    }
+    if (publicationYear === "") setPublication(0);
 
-    if (ISBN !== ""){
-      if(!checkISBN(ISBN)) {
+    if (ISBN !== "") {
+      if (!checkISBN(ISBN)) {
         setISBNError("ISBN is not invalid");
         setIsFormValid(false);
-
-      }
-      else {
-        setbookNameError("");
+      } else {
+        setISBNError("");
       }
     } else {
-      setbookNameError("");
+      setISBNError("");
     }
-      
 
     setUuid(crypto.randomUUID());
+    setIsFormValid(
+      authors.length > 0 &&
+        bookName !== "" &&
+        rating !== "" &&
+        publicationYear !== "" &&
+        (ISBN === "" || checkISBN(ISBN))
+    );
 
     if (isFormValid) {
       try {
@@ -240,7 +228,9 @@ const UploadSong = () => {
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                   />
+                  {authorError && <p className="text-red-500">{authorError}</p>}
                   <button
+                    type="button"
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
                     onClick={() => {
                       if (author.trim()) {
@@ -311,52 +301,56 @@ const UploadSong = () => {
               </div>
             </div>
           </div>
-         { showPopup && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
-            <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
-              <div className="flex justify-center mb-4">
-                <svg
-                  className="h-12 w-12 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Success!</h2>
-              <p className="mb-6">Your book has been added successfully.</p>
-              <div className="flex justify-between">
-                <button
-                  onClick={handleContinue}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Continue Adding Books
-                </button>
-                <button
-                  onClick={handleHome}
-                  className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
-                >
-                  Go to Home Page
-                </button>
+          {showPopup && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+              <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
+                <div className="flex justify-center mb-4">
+                  <svg
+                    className="h-12 w-12 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Success!</h2>
+                <p className="mb-6">Your book has been added successfully.</p>
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={handleContinue}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Continue Adding Books
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleHome}
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Go to Home Page
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           )}
           <div className="text-white my-10 flex flex-row gap-4 justify-end mr-20">
             <button
-              onClick={() => navigate("/home")}
+              type="button"
+              onClick={() => navigate("/")}
               className="bg-cancel_grey  px-8 py-4 my-2 rounded-xl   text-white"
             >
               Cancel
             </button>
             <button
               type="submit"
+              onClick={handleSubmit}
               className="bg-submit_blue  px-8 py-4 my-2 rounded-xl   text-white"
             >
               Submit
