@@ -96,7 +96,7 @@ const waitForAdd = () => {
     }
   
     // Validate Publication Year
-    if (publicationYear && (publicationYear < 1800 || isNaN(publicationYear))) {
+    if (publicationYear && (publicationYear <= 1800 || isNaN(publicationYear))) {
       errors.publicationYearError = "Publication year must be greater than 1800";
     }
   
