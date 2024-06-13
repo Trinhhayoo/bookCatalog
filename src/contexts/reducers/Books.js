@@ -1,7 +1,8 @@
 import { BOOKS_ACTIONS } from "../../constants/dispatchTypes";
 import { booksInitialState } from "../initialStates/BooksInitialState";
 
-const books = (state, { type, payload }) => {
+const books = (state = booksInitialState, { type, payload }) => {
+  
   switch (type) {
     case BOOKS_ACTIONS.SAVE_BOOKS_DATA:
       return { ...state, booksData: payload };
@@ -30,9 +31,10 @@ const books = (state, { type, payload }) => {
       };
 
     case BOOKS_ACTIONS.ADD_BOOK:
+     
       return {
         ...state,
-        booksData: [...state.booksData, payload.newBook],
+        booksData: [...state.booksData, payload],
       };
 
     default:

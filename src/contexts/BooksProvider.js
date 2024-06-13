@@ -123,12 +123,26 @@ const BooksProvider = ({ children }) => {
     }
   };
 
-  const addNewBook = async (newBook) => {
+  const addNewBook = async (newBook, uuid, uploadedImagePost) => {
     try {
-      const booksRef = collection(fireStore, "Books");
-      await setDoc(doc(booksRef), newBook);
+      console.log(booksData)
+      const response = await setDoc(doc(fireStore, "Books", uuid), {
+        Name: newBook.Name,
+        Authors: newBook.Authors,
+        Rating: newBook.Rating,
+        publicationYear: newBook.publicationYear,
+        ISBN: newBook.ISBN,
+      });
+        const storageRef = sRef(storage, `booksImage/${uuid}`);
+        const uploadTask = await uploadBytesResumable(
+          storageRef,
+          uploadedImagePost
+        );
+       
+    
       booksDispatch({ type: BOOKS_ACTIONS.ADD_BOOK, payload: newBook });
       toast.success("New book added successfully!");
+      getAllData();
     } catch (error) {
       handleError(error);
     }

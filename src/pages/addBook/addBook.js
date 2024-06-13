@@ -1,14 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect , useContext} from "react";
 
 import React from "react";
 
-import { fireStore, storage } from "../../database/firebase";
-import { setDoc, doc } from "firebase/firestore";
-import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { BooksContext } from "../../contexts/BooksProvider";
 
 const UploadSong = () => {
+  const { addNewBook } =
+  useContext(BooksContext);
   const navigate = useNavigate();
 
   const [bookName, setbookName] = useState("");
@@ -39,6 +39,14 @@ const UploadSong = () => {
   const [author, setAuthor] = useState();
 
   const [showPopup, setShowPopup] = useState(false);
+
+
+const waitForAdd = () => {
+    const loader = setTimeout(() => {
+      setIsUploaded(true);
+    }, 2000);
+    return () => clearTimeout(loader);
+}
 
   const handleContinue = () => {
     setShowPopup(false);
@@ -72,66 +80,75 @@ const UploadSong = () => {
   const checkISBN = (isbn) => {
     return isValidIsbn10(isbn) || isValidIsbn13(isbn);
   };
-
-  const handleSubmit = async (event) => {
-    //  event.preventDefault();
-    event.preventDefault();
-
-    if (authors.length === 0) {
-      setAuthorError("Author must have at least one");
-    } else {
-      setAuthorError("");
+  const validateForm = (bookName, authors, rating, publicationYear, ISBN) => {
+    const errors = {};
+  
+    // Validate Name
+    if (!bookName) {
+      errors.bookNameError = "Book's name is required";
+    } else if (bookName.length > 100) {
+      errors.bookNameError = "Book's name cannot be longer than 100 characters";
     }
-
-    if (bookName === "") {
-      setbookNameError("Book's name is required");
+  
+    // Validate Authors
+    if (authors.length === 0) {
+      errors.authorError = "Author must have at least one";
+    }
+  
+    // Validate Publication Year
+    if (publicationYear && (publicationYear < 1800 || isNaN(publicationYear))) {
+      errors.publicationYearError = "Publication year must be greater than 1800";
+    }
+  
+    // Validate Rating
+    if (rating && (isNaN(rating) || rating < 0 || rating > 10)) {
+      errors.ratingError = "Rating must be a number between 0 and 10";
+    }
+  
+    // Validate ISBN
+    if (ISBN && !checkISBN(ISBN)) {
+      errors.ISBNError = "ISBN is invalid";
+    }
+  
+    return errors;
+  };
+  const handleInitialNotification = () => {
+    if (bookName.length > 100) {
+      setbookNameError("Book's name cannot be longer than 100 characters");
     } else {
       setbookNameError("");
     }
-    if (rating === "") {
-      setRating(0);
-    }
-    if (publicationYear === "") setPublication(0);
+  };
+  
 
-    if (ISBN !== "") {
-      if (!checkISBN(ISBN)) {
-        setISBNError("ISBN is not invalid");
-        setIsFormValid(false);
-      } else {
-        setISBNError("");
-      }
-    } else {
-      setISBNError("");
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    setUuid(crypto.randomUUID());
-    setIsFormValid(
-      authors.length > 0 &&
-        bookName !== "" &&
-        rating !== "" &&
-        publicationYear !== "" &&
-        (ISBN === "" || checkISBN(ISBN))
-    );
+    const errors = validateForm(bookName, authors, rating, publicationYear, ISBN);
+    setbookNameError(errors.bookNameError || "");
+    setAuthorError(errors.authorError || "");
+    setRatingError(errors.ratingError || "");
+    setPublicationYearError(errors.publicationYearError || "");
+    setISBNError(errors.ISBNError || "");
+
+    const isFormValid = Object.keys(errors).length === 0;
 
     if (isFormValid) {
       try {
-        const response = await setDoc(doc(fireStore, "Books", uuid), {
+        const newBook = {
           Name: bookName,
           Authors: authors,
-          Rating: rating,
-          publicationYear: publicationYear,
-          ISBN: ISBN,
-        });
-        const storageRef = ref(storage, `booksImage/${uuid}`);
-        const uploadTask = await uploadBytesResumable(
-          storageRef,
-          uploadedImagePost
-        );
-        console.log(response);
-        console.log(uploadTask);
+          Rating: rating || 0,
+          publicationYear: publicationYear || 0,
+          ISBN: ISBN || ""
+        };
+
+        await addNewBook(newBook, crypto.randomUUID(), uploadedImagePost);
+
         setShowPopup(true);
+        // resetForm();
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
   };
@@ -153,7 +170,6 @@ const UploadSong = () => {
       setUploadedImagePost("");
     }
   };
-
   return (
     <div className=" w-full bg-gray-900 flex flex-col ">
       <div className="relative py-24 mt-16 overflow-hidden bg-gray-900 lg:mt-0 isolate sm:pt-32 sm:pb-16">
@@ -202,6 +218,7 @@ const UploadSong = () => {
                   type="text"
                   className="pl-2 text-white w-full h-10 rounded bg-near_black focus:outline-none focus:border-blue-500"
                   value={bookName}
+                  
                   onChange={(e) => setbookName(e.target.value)}
                 />
                 {bookNameError && (
